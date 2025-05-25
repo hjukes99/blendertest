@@ -79,6 +79,7 @@ links.new(map_range.outputs['Result'], color.inputs['Fac'])
 
 # Configure rainbow color ramp
 cr = color.color_ramp
+cr.elements.clear()  # Clear default elements to ensure only custom stops are present
 cr.elements.new(0.17)
 cr.elements.new(0.33)
 cr.elements.new(0.5)
