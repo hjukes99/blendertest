@@ -126,3 +126,42 @@ wick_principled = wick_nodes.get('Principled BSDF')
 wick_principled.inputs['Base Color'].default_value = (0.05, 0.03, 0.02, 1)
 wick_principled.inputs['Roughness'].default_value = 0.6
 wick.data.materials.append(wick_mat)
+
+# -----------------
+# Flame Setup
+# -----------------
+
+bpy.ops.mesh.primitive_cone_add(vertices=32, radius1=0.07, radius2=0.0,
+                                depth=0.3, location=(0, 0, 2.35))
+flame = bpy.context.active_object
+flame.name = "Flame"
+bpy.ops.object.shade_smooth()
+
+# Material for Flame with color gradient
+flame_mat = bpy.data.materials.new(name="FlameMaterial")
+flame_mat.use_nodes = True
+f_nodes = flame_mat.node_tree.nodes
+f_links = flame_mat.node_tree.links
+f_nodes.clear()
+
+f_output = f_nodes.new('ShaderNodeOutputMaterial')
+f_emission = f_nodes.new('ShaderNodeEmission')
+f_emission.inputs['Strength'].default_value = 5.0
+
+f_tex = f_nodes.new('ShaderNodeTexCoord')
+f_sep = f_nodes.new('ShaderNodeSeparateXYZ')
+f_ramp = f_nodes.new('ShaderNodeValToRGB')
+
+f_links.new(f_tex.outputs['Generated'], f_sep.inputs['Vector'])
+f_links.new(f_sep.outputs['Z'], f_ramp.inputs['Fac'])
+f_links.new(f_ramp.outputs['Color'], f_emission.inputs['Color'])
+f_links.new(f_emission.outputs['Emission'], f_output.inputs['Surface'])
+
+framp = f_ramp.color_ramp
+framp.elements[0].color = (0.2, 0.6, 1.0, 1)
+mid = framp.elements.new(0.4)
+mid.color = (1.0, 0.6, 0.1, 1)
+framp.elements[1].position = 1.0
+framp.elements[1].color = (1.0, 0.9, 0.5, 1)
+
+flame.data.materials.append(flame_mat)
